@@ -1,5 +1,5 @@
 import requests
-import csv
+import codecs
 from bs4 import BeautifulSoup as bs
 
 username = input('What is your trakt.tv username? ')
@@ -23,12 +23,14 @@ for li in num_pages:
         if int(number) > biggest_number:
             biggest_number = int(number)
 
-# Writes all the movies from the first page in a list
+# Writes all the movies from the first page in a .txt file
+dat = codecs.open("movies.txt", "w", "utf-8")
 titles = soup.find_all(class_='titles')
-table = []
 for title in titles:
     h3 = title.find('h3').get_text()
-    table.append(h3)
+    dat.write(h3 + '\n')
+dat.close()
+
 
 i = 2
 while i <= biggest_number:
@@ -38,19 +40,12 @@ while i <= biggest_number:
     src2 = results2.content
     soup2 = bs(src2, 'lxml')
 
-    # Writes the rest of the movies from all other pages in the same list
+    # Writes the rest of the movies from all other pages in the same .txt file
+    dat2 = codecs.open("movies.txt", "a", "utf-8")
     titles2 = soup2.find_all(class_='titles')
     for title2 in titles2:
         h3_2 = title2.find('h3').get_text()
-        table.append(h3_2)
+        dat2.write(h3_2 + '\n')
+    dat2.close()
     
     i += 1
-
-# Removes all the duplicates
-new_table = list(dict.fromkeys(table))
-
-# Writes the movies as a .csv file
-dat = open("movies.csv", "w")
-writer = csv.writer(dat)
-writer.writerow(new_table)
-dat.close()
